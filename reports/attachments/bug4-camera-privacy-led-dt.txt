@@ -1,0 +1,67 @@
+Dell Latitude 7455: camera privacy LED not linked to the OV02E10 sensor in the shipped DT
+Kernel 7.3.0-21-qcom-x1e (ppa:ubuntu-concept/x1e), Ubuntu 26.10 arm64. Read-only dumps, 2026-10-18.
+
+== 1. Shipped DTB: dtbs/7.3.0-21-qcom-x1e/qcom/x1e80100-dell-latitude-7455.dtb
+   sha256 5aee8b8a331f383f7633a40ffb098b6b586be5064e6905789461b235588fa5cc
+
+$ fdtget -t s <dtb> /soc@0/cci@ac16000/i2c-bus@1/camera@10 compatible
+ovti,ov02e10
+$ fdtget -p <dtb> /soc@0/cci@ac16000/i2c-bus@1/camera@10     (no leds / led-names)
+compatible
+reg
+reset-gpios
+pinctrl-names
+pinctrl-0
+clocks
+assigned-clocks
+assigned-clock-rates
+orientation
+avdd-supply
+dvdd-supply
+dovdd-supply
+$ fdtget -p <dtb> /leds/led-camera-indicator                  (no phandle; panic-indicator only)
+label
+function
+color
+gpios
+linux,default-trigger
+default-state
+panic-indicator
+
+== 2. LED hardware check (stock DT, 2026-10-11, camera idle)
+echo 1 > /sys/class/leds/white:camera-indicator/brightness   -> LED on (observed)
+echo 0 > /sys/class/leds/white:camera-indicator/brightness   -> LED off (observed)
+With a camera stream running on the stock DT, brightness stayed 0 and the LED stayed off.
+
+== 3. Change applied (decompiled diff of my local DTB before and after this change only; that DTB also carries an unrelated touchscreen fix, which is identical on both sides. phandle 0x2ea was the next free one)
+
+--- before.dts
++++ after.dts
+@@ -4202,6 +4202,8 @@
+ 				phandle = <0x284>;
+ 
+ 				camera@10 {
++					led-names = "privacy";
++					leds = <0x2ea>;
+ 					compatible = "ovti,ov02e10";
+ 					reg = <0x10>;
+ 					reset-gpios = <0x62 0xed 0x01>;
+@@ -10316,6 +10318,7 @@
+ 		pinctrl-names = "default";
+ 
+ 		led-camera-indicator {
++			phandle = <0x2ea>;
+ 			label = "white:camera-indicator";
+ 			function = "indicator";
+ 			color = <0x00>;
+
+Source form:
+  led-camera-indicator: label it, e.g. camera_indicator: led-camera-indicator { ... };
+  camera@10 { ...; leds = <&camera_indicator>; led-names = "privacy"; };
+
+== 4. Live state with the change (current boot)
+$ tr -d '\0' < /proc/device-tree/soc@0/cci@ac16000/i2c-bus@1/camera@10/led-names
+privacy
+$ cat /sys/class/leds/white:camera-indicator/brightness     (camera idle)
+0
+Camera on -> LED on, camera off -> LED off: verified by eye after a reboot on 2026-10-11.

@@ -1,0 +1,11 @@
+--- a/usr/sbin/qcom-firmware-extract
++++ b/usr/sbin/qcom-firmware-extract
+@@ -105,7 +105,7 @@
+ 	nobitlocker=1
+ fi
+ 
+-if [ -z "$part" ]; then
++if [ -z "$part" ] && [ -z "$search_path" ]; then
+ 	printf "error: Failed to find windows partition" >&2
+ 	exit 1
+ fi

@@ -1,0 +1,61 @@
+qcom-firmware-extract: qcvss8380.mbn not extracted (Dell Latitude 7455)
+Hostname replaced with 'host'. No firmware binaries attached.
+
+== 1. Stock first boot after extraction, before qcvss8380.mbn was added by hand
+   2026-10-11, clean install from 26.10 arm64 daily, kernel 7.3.0-9-generic
+   (journal timestamps before the clock sync read Oct 02)
+
+Oct 02 10:35:38 host kernel: Linux version 7.3.0-9-generic (buildd@bos03-arm64-076) (aarch64-linux-gnu-gcc (Ubuntu 15.3.0-4ubuntu1) 15.3.0, GNU ld (GNU Binutils for Ubuntu) 2.47) #9-Ubuntu SMP PREEMPT_DYNAMIC Mon Oct  5 10:26:36 UTC 2026 (Ubuntu 7.3.0-9.9-generic 7.3.0-rc6)
+Oct 02 10:35:38 host kernel: Machine model: Dell Latitude 7455
+...
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: Direct firmware load for qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn failed with error -2
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: firmware download failed -2
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: video hw is power on
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: core init failed
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: Direct firmware load for qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn failed with error -2
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: firmware download failed -2
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: video hw is power on
+Oct 11 11:10:41 host kernel: qcom-iris aa00000.video-codec: core init failed
+... (repeats on every open of the video node)
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: Direct firmware load for qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn failed with error -2
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: firmware download failed -2
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: video hw is power on
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: core init failed
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: Direct firmware load for qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn failed with error -2
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: firmware download failed -2
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: video hw is power on
+Oct 11 11:11:31 host kernel: qcom-iris aa00000.video-codec: core init failed
+
+== 2. Current state, 2026-10-18, after copying qcvss8380.mbn from the DriverStore
+
+$ uname -r
+7.3.0-21-qcom-x1e
+$ cat /proc/device-tree/model
+Dell Latitude 7455
+$ dpkg-query -W qcom-firmware-extract qcom-x1e-firmware-extracted-x1e80100-dell-latitude7455
+qcom-firmware-extract	20
+qcom-x1e-firmware-extracted-x1e80100-dell-latitude7455	20261011
+$ ls -l /usr/lib/firmware/updates/qcom/x1e80100/dell/latitude-7455/
+-rw-r--r-- 72408 adsp_dtbs.elf
+-rw-r--r-- 670 adspr.jsn
+-rw-r--r-- 515 adsps.jsn
+-rw-r--r-- 703 adspua.jsn
+-rw-r--r-- 516 battmgr.jsn
+-rw-r--r-- 40760 cdsp_dtbs.elf
+-rw-r--r-- 534 cdspr.jsn
+-rw-r--r-- 22316328 qcadsp8380.mbn
+-rw-r--r-- 3195304 qccdsp8380.mbn
+-rw-r--r-- 12088 qcdxkmsuc8380.mbn
+-rw-r--r-- 12088 qcdxkmsucpurwa.mbn
+-rw-r--r-- 2323048 qcvss8380.mbn
+$ dpkg -S /usr/lib/firmware/updates/qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn
+dpkg-query: no path found matching pattern /usr/lib/firmware/updates/qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn
+$ sha256sum /usr/lib/firmware/updates/qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn
+d52c28872ebbaf8087a30bf196d15ee24839fd62a2d91b605edfa73c09bbd8d4  /usr/lib/firmware/updates/qcom/x1e80100/dell/latitude-7455/qcvss8380.mbn
+$ cat /sys/class/video4linux/video{16,17}/name
+qcom-iris-decoder
+qcom-iris-encoder
+$ journalctl -k -b | grep -iE 'qcom-iris|qcvss'
+(no output: no firmware load errors this boot)
+
+Not verified: decoding or encoding an actual stream.
