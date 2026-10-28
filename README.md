@@ -8,6 +8,7 @@ Field notes, how-tos and small scripts from getting Ubuntu 26.10 ARM64 running a
 
 Write-ups and bug reports:
 
+* [I fixed the touchscreen so I could turn it off](https://medium.com/@pmdev/i-fixed-the-touchscreen-so-i-could-turn-it-off-f9e45dee41f1) (Medium): the whole story, from the $515 purchase and the DriverStore backup to the rebuild and daily use.
 * [Write-up on Ubuntu Discourse](https://discourse.ubuntu.com/t/latitude-7455-on-26-10-built-it-twice-used-it-for-a-week-heres-whats-left/89825) (copy in [reports/discourse-article.md](reports/discourse-article.md)): the write-up for the Ubuntu Concept team (brightness, touchscreen, camera privacy LED, firmware extraction), with a full device matrix.
 * Launchpad:
   * [LP #2171350](https://bugs.launchpad.net/ubuntu/+source/qcom-firmware-extract/+bug/2171350): `qcom-firmware-extract -d` fails when Windows is gone
